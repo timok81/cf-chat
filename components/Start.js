@@ -69,13 +69,13 @@ const styles = StyleSheet.create({
     flex: 0.75,
   },
   actionBox: {
-    justifyContent: "space-around",
+    justifyContent: "space-evenly",
     alignItems: "center",
     alignSelf: "center",
     width: "88%",
-    height: 300,
-    paddingTop: 10,
-    paddingBottom: 10,
+    height: 250,
+    paddingTop: 5,
+    paddingBottom: 5,
     marginBottom: 20,
     backgroundColor: "white",
     borderRadius: 10,
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   },
   button: {
     width: "88%",
-    height: 60,
+    height: 50,
     backgroundColor: "#757083",
     justifyContent: "center",
     alignItems: "center",
@@ -105,16 +105,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   chooseColor: {
-    fontSize: 20,
+    fontSize: 18,
   },
   colors: {
     flexDirection: "row",
-    gap: 20,
+    gap: 30,
   },
   colorSelector: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
 });
 
