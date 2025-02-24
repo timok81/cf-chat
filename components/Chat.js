@@ -1,43 +1,46 @@
 import { StyleSheet, View, KeyboardAvoidingView, Platform } from "react-native";
 import { useEffect, useState } from "react";
 import { GiftedChat, Bubble } from "react-native-gifted-chat";
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+} from "firebase/firestore";
+import PropTypes from "prop-types";
 
-const Chat = ({ route, navigation }) => {
-  const { name, bgColor } = route.params;
+const Chat = ({ route, navigation, db }) => {
+  const { name, bgColor, userID } = route.params;
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    //Sets screen title at the top
     navigation.setOptions({ title: name });
+    const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+    
+    //Listen for database events
+    const unsubChat = onSnapshot(q, (documents) => {
+      let newMessages = [];
+      documents.forEach((document) => {
+        newMessages.push({
+          id: document.id,
+          ...document.data(),
+          createdAt: new Date(document.data().createdAt.toMillis()),
+        });
+      });
+      setMessages(newMessages);
+    });
+    return () => {
+      if (unsubChat) unsubChat();
+    };
   }, []);
 
-  useEffect(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: "Hello chatter",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: "React Native",
-          avatar: "https://placeimg.com/140/140/any",
-        },
-      },
-      {
-        _id: 2,
-        text: "This is a system message",
-        createdAt: new Date(),
-        system: true,
-      },
-    ]);
-  }, []);
-
+  //Send message handler
   const onSend = (newMessages) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, newMessages)
-    );
+    addDoc(collection(db, "messages"), newMessages[0]);
   };
 
+  //Set chat bubble appearance
   const renderBubble = (props) => {
     return (
       <Bubble
@@ -55,14 +58,15 @@ const Chat = ({ route, navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: bgColor }]}>
+    <View style={[styles.container, { backgroundColor: bgColor || "#474056" }]}>
       {/* Renders chat */}
       <GiftedChat
         messages={messages}
         renderBubble={renderBubble}
         onSend={(messages) => onSend(messages)}
         user={{
-          _id: 1,
+          _id: userID,
+          name: name || "Chatter",
         }}
       />
 
@@ -86,5 +90,13 @@ const styles = StyleSheet.create({
     fontSize: 30,
   },
 });
+
+Chat.propTypes = {
+  route: PropTypes.shape({
+    name: PropTypes.string,
+    bgColor: PropTypes.string,
+    userID: PropTypes.string,
+  }).isRequired,
+};
 
 export default Chat;
