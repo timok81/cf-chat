@@ -44,6 +44,7 @@ const Start = ({ navigation }) => {
           />
           <Text style={styles.chooseColor}>Choose background color</Text>
           <View style={styles.colors}>
+            
             {/* For each bgColors element, make a color selector button and set matching color in press event */}
             {bgColors.map((color, index) => (
               <TouchableOpacity

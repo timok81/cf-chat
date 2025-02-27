@@ -18,7 +18,7 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
   const { name, bgColor, userID } = route.params;
   const [messages, setMessages] = useState([]);
 
-  //This must be declared outside of useEffect so that the old unsub listener gets removed
+  //This must be declared outside of useEffect so that the old listener gets removed
   let unsubChat;
 
   useEffect(() => {
@@ -28,22 +28,18 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
     if (isConnected === true) {
       if (unsubChat) unsubChat();
       unsubChat = null;
-
-      //Gets all documents from db
       const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
 
-      //Get message documents from database to update chat messages in realtime
+      //Listen for database events to update messages in realtime
       unsubChat = onSnapshot(q, (documents) => {
         let newMessages = [];
-        documents.forEach((doc) => {
-          const data = doc.data();
+        documents.forEach((document) => {
           newMessages.push({
-            _id: doc.id,
-            ...doc.data(),
-            createdAt: data.createdAt?.toDate() || new Date(),
+            id: document.id,
+            ...document.data(),
+            createdAt: new Date(document.data().createdAt.toMillis()),
           });
         });
-        //Store messages locally and update chat messages to new value
         cacheMessages(newMessages);
         setMessages(newMessages);
       });
@@ -51,7 +47,6 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
 
     //Cleanup
     return () => {
-      //Calling onSnapshot cancels it
       if (unsubChat) unsubChat();
     };
   }, [isConnected]);
@@ -71,15 +66,20 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
     setMessages(JSON.parse(cachedMessages));
   };
 
-  //Send message handler. All messages need _id, user, and createdAt to display correctly
+  //Send message handler
   const onSend = (newMessages) => {
+    const [message] = newMessages;
+
     addDoc(collection(db, "messages"), {
-      ...newMessages[0],
+      _id: message._id,
+      text: message.text || "",
       createdAt: serverTimestamp(),
+      user: message.user,
+      image: message.image || null,
+      location: message.location || null,
     });
 
-    //useState callback function first param is the previous state (prevMessages)
-    setMessages((prevMessages) => GiftedChat.append(prevMessages, newMessages));
+    setMessages((prev) => GiftedChat.append(prev, newMessages));
   };
 
   //Set chat bubble appearance
@@ -106,7 +106,6 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
     } else return null;
   };
 
-  //Creates "+" button
   const renderCustomActions = (props) => (
     <CustomActions
       userID={userID}
@@ -117,7 +116,6 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
     />
   );
 
-  //Renders google maps view
   const renderCustomView = (props) => {
     const { currentMessage } = props;
     if (currentMessage.location) {
