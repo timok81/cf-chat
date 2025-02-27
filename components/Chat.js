@@ -1,4 +1,11 @@
-import { StyleSheet, View, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  StyleSheet,
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { useEffect, useState } from "react";
 import { GiftedChat, Bubble, InputToolbar } from "react-native-gifted-chat";
 import {
@@ -13,10 +20,12 @@ import PropTypes from "prop-types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomActions from "./CustomActions";
 import MapView from "react-native-maps";
+import { Audio } from "expo-av";
 
 const Chat = ({ route, navigation, db, isConnected, storage }) => {
   const { name, bgColor, userID } = route.params;
   const [messages, setMessages] = useState([]);
+  let soundObject = null;
 
   //This must be declared outside of useEffect so that the old unsub listener gets removed
   let unsubChat;
@@ -51,8 +60,8 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
 
     //Cleanup
     return () => {
-      //Calling onSnapshot cancels it
-      if (unsubChat) unsubChat();
+      if (unsubChat) unsubChat(); //Calling onSnapshot cancels it
+      if (soundObject) soundObject.unloadAsync(); //Unload audio
     };
   }, [isConnected]);
 
@@ -136,6 +145,35 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
     return null;
   };
 
+  //Renders audio message
+  const renderAudioBubble = (props) => {
+    return (
+      <View {...props}>
+        <TouchableOpacity
+          style={{ backgroundColor: "#FFD24B", borderRadius: 10, margin: 5 }}
+          onPress={async () => {
+            if (soundObject) soundObject.unloadAsync();
+            const { sound } = await Audio.Sound.createAsync({
+              uri: props.currentMessage.audio,
+            });
+            soundObject = sound;
+            await sound.playAsync();
+          }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              color: "black",
+              padding: 10,
+            }}
+          >
+            Play Audio
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: bgColor || "#474056" }]}>
       {/* Renders chat */}
@@ -145,6 +183,7 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
         renderInputToolbar={renderInputToolbar}
         renderActions={renderCustomActions}
         renderCustomView={renderCustomView}
+        renderMessageAudio={renderAudioBubble}
         onSend={(messages) => onSend(messages)}
         user={{
           _id: userID,
