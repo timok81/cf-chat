@@ -94,8 +94,7 @@ const CustomActions = ({
     if (permissions?.granted) {
       let result = await ImagePicker.launchImageLibraryAsync();
       if (!result.canceled) await uploadAndSendImage(result.assets[0].uri);
-      else Alert.alert("Permissions haven't been granted.");
-    }
+    } else Alert.alert("Permissions haven't been granted.");
   };
 
   //Allows user to take a photo with phone cam
@@ -104,8 +103,7 @@ const CustomActions = ({
     if (permissions?.granted) {
       let result = await ImagePicker.launchCameraAsync();
       if (!result.canceled) await uploadAndSendImage(result.assets[0].uri);
-      else Alert.alert("Permissions haven't been granted.");
-    }
+    } else Alert.alert("Permissions haven't been granted.");
   };
 
   //Allows user to display their google maps location
