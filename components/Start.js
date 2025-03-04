@@ -15,6 +15,7 @@ const Start = ({ navigation }) => {
   const [name, setName] = useState("");
   const bgColors = ["#090C08", "#474056", "#8A95A5", "#B9C6AE"];
   const [bgColor, setBgColor] = useState("");
+  const [pressedButtonIndex, setPressedButtonIndex] = useState(null);
 
   //Signing user in before entering chat
   const signInUser = () => {
@@ -43,22 +44,26 @@ const Start = ({ navigation }) => {
           />
           <Text style={styles.chooseColor}>Choose background color</Text>
           <View style={styles.colors}>
-            
             {/* For each bgColors element, make a color selector button and set matching color in press event */}
             {bgColors.map((color, index) => (
               <TouchableOpacity
                 key={index}
-                style={[styles.colorSelector, { backgroundColor: color }]}
+                style={[
+                  styles.colorSelector,
+                  pressedButtonIndex === index && styles.selectedColor,
+                  { backgroundColor: color },
+                ]}
                 onPress={() => {
                   if (!bgColor) {
                     setBgColor(bgColors[0]);
                   }
                   setBgColor(color);
+                  setPressedButtonIndex(index);
                 }}
               />
             ))}
           </View>
-          <TouchableOpacity style={styles.button} onPress={ signInUser}>
+          <TouchableOpacity style={styles.button} onPress={signInUser}>
             <Text style={styles.buttonText}>Start chatting</Text>
           </TouchableOpacity>
         </View>
@@ -126,6 +131,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+  },
+  selectedColor: {
+    borderColor: "#E2A5C4",
+    borderWidth: 5,
   },
 });
 
