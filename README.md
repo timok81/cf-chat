@@ -34,4 +34,16 @@ A basic React Native chat app developed using Expo and Gifted Chat. Uses Google 
  - Navigate to project directory
  - Run <code>npm install</code> to install dependencies
  - Run <code>npm run start</code> to run project
- - Open Expo Go on either your physical device or emulator. The App should appear on the screen.
+ - Open Expo Go on either your physical device or emulator. The App should be listed on the Expo screen.
+
+ ## Technologies used
+
+ - React Native
+ - Google Firebase
+ - Expo
+ - Gifted chat
+
+ ## Images
+
+ ![Screenshot of the app](/assets/images/chat1.png)
+ ![Screenshot of the app](/assets/images/chat3.png)
